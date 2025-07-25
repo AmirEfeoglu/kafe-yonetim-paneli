@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Söz Coffe Yönetim Paneli</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+<div class="container">
+    <h1>Söz Coffe Yönetim Paneli</h1>
+
+    <div id="main-screen" class="screen active-screen">
+        <div class="panel-section table-selection">
+            <div class="main-screen-header">
+                <h2>Masalar</h2>
+                <button id="add-table-icon-button" class="icon-button add-button-small" title="Yeni Masa Ekle">
+                    <i class="fas fa-plus"></i>
+                </button>
+                <button id="show-reports-button" class="icon-button reports-button-small" title="Raporları Gör">
+                    <i class="fas fa-chart-line"></i>
+                </button>
+                <button id="show-products-button" class="icon-button products-button-small" title="Ürünleri Yönet">
+                    <i class="fas fa-coffee"></i>
+                </button>
+            </div>
+
+            <div id="tables-container" class="tables">
+            </div>
+        </div>
+    </div>
+
+    <div id="order-screen" class="screen">
+        <div class="panel-section order-management">
+            <button id="back-to-main-button" class="back-button">← Masalara Dön</button>
+            <h2 class="order-screen-title"><span id="current-table-display">Masa 1</span> Sipariş Detayı</h2>
+
+            <div class="product-selection">
+                <h3>Ürünler</h3>
+                <div id="product-list" class="products">
+                </div>
+            </div>
+
+            <div class="order-details">
+                <h3>Güncel Sipariş</h3>
+                <ul id="order-items">
+                </ul>
+                <div class="discount-section">
+                    <h4>İskonto Uygula</h4>
+                    <div class="discount-buttons">
+                        <button class="discount-button" data-discount-rate="0.10">%10</button>
+                        <button class="discount-button" data-discount-rate="0.15">%15</button>
+                        <button class="discount-button" data-discount-rate="0.20">%20</button>
+                        <button class="discount-button reset-discount">Sıfırla</button>
+                    </div>
+                    <p class="applied-discount-info" style="display: none;">Uygulanan İskonto: <span id="applied-discount-rate">0%</span> (<span id="discount-amount">0.00</span>₺)</p>
+                </div>
+
+                <div class="total-section">
+                    <strong>Toplam Hesap:</strong> <span id="total-amount">0.00</span>₺
+                </div>
+
+                <div class="action-buttons-group">
+                    <button id="clear-order-button" class="action-button clear">Siparişi Temizle</button>
+                    <button id="print-receipt-button" class="action-button print">Fiş Çıkar</button>
+                    <button id="complete-order-button" class="action-button complete">Siparişi Tamamla</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="report-screen" class="screen">
+        <div class="panel-section report-management">
+            <button id="back-to-main-from-reports-button" class="back-button">← Masalara Dön</button>
+            <h2 class="report-screen-title">Ciro Raporları</h2>
+
+            <div class="report-section">
+                <h3>Bugünkü Ciro</h3>
+                <p class="report-amount" id="daily-revenue">0.00₺</p>
+            </div>
+
+            <div class="report-section">
+                <h3>Bu Haftaki Ciro</h3>
+                <p class="report-amount" id="weekly-revenue">0.00₺</p>
+            </div>
+
+            <div class="report-section">
+                <h3>Bu Aydaki Ciro</h3>
+                <p class="report-amount" id="monthly-revenue">0.00₺</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="product-management-screen" class="screen">
+        <div class="panel-section product-management">
+            <button id="back-to-main-from-products-button" class="back-button">← Masalara Dön</button>
+            <h2 class="product-management-screen-title">Ürün Yönetimi</h2>
+
+            <div class="add-product-section">
+                <h3>Yeni Ürün Ekle</h3>
+                <div class="add-product-form">
+                    <input type="text" id="new-product-name" placeholder="Ürün Adı" class="product-input">
+                    <input type="number" id="new-product-price" placeholder="Fiyat (₺)" min="0" step="0.01" class="product-input">
+                    <button id="add-product-button" class="action-button add-product">Ürün Ekle</button>
+                </div>
+            </div>
+
+            <div class="existing-products-section">
+                <h3>Mevcut Ürünler</h3>
+                <div id="product-management-list" class="product-management-list">
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<div id="toast-container"></div>
+
+<div id="receipt-modal" class="modal">
+    <div class="modal-content">
+        <span class="close-button">&times;</span>
+        <div id="receipt-content" class="receipt-preview">
+        </div>
+        <p class="print-instruction">Yazdırmak için **Ctrl + P** tuşlarına basın.</p>
+    </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
