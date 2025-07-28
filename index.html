@@ -26,8 +26,13 @@
                     <i class="fas fa-coffee"></i>
                 </button>
             </div>
-
             <div id="tables-container" class="tables">
+            </div>
+            <div class="daily-revenue-summary">
+                <h3>Günlük Ciro: <span id="daily-total-revenue-amount">0.00</span>₺</h3>
+                <button id="reset-daily-revenue-button" class="reset-button" title="Günlük Ciroyu Sıfırla">
+                    <i class="fas fa-redo"></i> Ciroyu Sıfırla
+                </button>
             </div>
         </div>
     </div>
@@ -37,6 +42,12 @@
             <button id="back-to-main-button" class="back-button">← Masalara Dön</button>
             <h2 class="order-screen-title"><span id="current-table-display">Masa 1</span> Sipariş Detayı</h2>
 
+            <div class="product-tabs">
+                <button class="tab-button active" data-category="all">Tümü</button>
+                <button class="tab-button" data-category="cold-drinks">Soğuk İçecekler</button>
+                <button class="tab-button" data-category="hot-drinks">Sıcak İçecekler</button>
+                <button class="tab-button" data-category="desserts">Tatlılar</button>
+            </div>
             <div class="product-selection">
                 <h3>Ürünler</h3>
                 <div id="product-list" class="products">
@@ -47,48 +58,72 @@
                 <h3>Güncel Sipariş</h3>
                 <ul id="order-items">
                 </ul>
-                <div class="discount-section">
-                    <h4>İskonto Uygula</h4>
-                    <div class="discount-buttons">
-                        <button class="discount-button" data-discount-rate="0.10">%10</button>
-                        <button class="discount-button" data-discount-rate="0.15">%15</button>
-                        <button class="discount-button" data-discount-rate="0.20">%20</button>
-                        <button class="discount-button reset-discount">Sıfırla</button>
+
+                <div class="order-summary">
+                    <div class="discount-section">
+                        <h4>İskonto:</h4>
+                        <div class="discount-buttons-group">
+                            <button class="discount-button" data-discount="0">0%</button>
+                            <button class="discount-button" data-discount="0.05">5%</button>
+                            <button class="discount-button" data-discount="0.10">10%</button>
+                            <button class="discount-button" data-discount="0.15">15%</button>
+                            <button class="discount-button" data-discount="0.20">20%</button>
+                            <div class="custom-discount-input-group">
+                                <input type="number" id="custom-discount-percentage" min="0" max="100" placeholder="Özel %" class="custom-discount-input">
+                                <button id="apply-custom-discount-button" class="icon-button apply-custom-discount-button" title="Özel İskonto Uygula">
+                                    <i class="fas fa-check"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <p class="applied-discount-info">Uygulanan İskonto: <span id="applied-discount-rate">0%</span></p>
+                        <p>İskonto Tutarı: <span id="discount-amount">0.00₺</span></p>
                     </div>
-                    <p class="applied-discount-info" style="display: none;">Uygulanan İskonto: <span id="applied-discount-rate">0%</span> (<span id="discount-amount">0.00</span>₺)</p>
+                    <div class="total-section">
+                        <p class="subtotal-info">Ara Toplam: <span id="subtotal-amount">0.00₺</span></p>
+                        <p class="grand-total-info">Toplam Tutar: <span id="total-amount">0.00₺</span></p>
+                        <div class="payment-method-selection">
+                            <h4>Ödeme Yöntemi:</h4>
+                            <label><input type="radio" name="payment-method" value="cash" checked> Nakit</label>
+                            <label><input type="radio" name="payment-method" value="card"> Kart</label>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="total-section">
-                    <strong>Toplam Hesap:</strong> <span id="total-amount">0.00</span>₺
-                </div>
-
-                <div class="action-buttons-group">
-                    <button id="clear-order-button" class="action-button clear">Siparişi Temizle</button>
-                    <button id="print-receipt-button" class="action-button print">Fiş Çıkar</button>
-                    <button id="complete-order-button" class="action-button complete">Siparişi Tamamla</button>
+                <div class="order-actions">
+                    <button id="clear-order-button" class="action-button danger-button"><i class="fas fa-eraser"></i> Siparişi Temizle</button>
+                    <button id="print-receipt-button" class="action-button info-button"><i class="fas fa-print"></i> Fiş Yazdır</button>
+                    <button id="complete-order-button" class="action-button success-button"><i class="fas fa-check-circle"></i> Siparişi Tamamla</button>
                 </div>
             </div>
         </div>
     </div>
 
     <div id="report-screen" class="screen">
-        <div class="panel-section report-management">
+        <div class="panel-section reports">
             <button id="back-to-main-from-reports-button" class="back-button">← Masalara Dön</button>
-            <h2 class="report-screen-title">Ciro Raporları</h2>
-
-            <div class="report-section">
-                <h3>Bugünkü Ciro</h3>
-                <p class="report-amount" id="daily-revenue">0.00₺</p>
+            <h2 class="report-screen-title">Satış Raporları</h2>
+            <div class="report-summary">
+                <div class="report-card">
+                    <h3>Günlük Ciro</h3>
+                    <p>Toplam: <span id="daily-revenue">0.00₺</span></p>
+                    <p>Nakit: <span id="daily-cash-revenue">0.00₺</span></p>
+                    <p>Kart: <span id="daily-card-revenue">0.00₺</span></p>
+                </div>
+                <div class="report-card">
+                    <h3>Haftalık Ciro</h3>
+                    <p>Toplam: <span id="weekly-revenue">0.00₺</span></p>
+                    <p>Nakit: <span id="weekly-cash-revenue">0.00₺</span></p>
+                    <p>Kart: <span id="weekly-card-revenue">0.00₺</span></p>
+                </div>
+                <div class="report-card">
+                    <h3>Aylık Ciro</h3>
+                    <p>Toplam: <span id="monthly-revenue">0.00₺</span></p>
+                    <p>Nakit: <span id="monthly-cash-revenue">0.00₺</span></p>
+                    <p>Kart: <span id="monthly-card-revenue">0.00₺</span></p>
+                </div>
             </div>
-
-            <div class="report-section">
-                <h3>Bu Haftaki Ciro</h3>
-                <p class="report-amount" id="weekly-revenue">0.00₺</p>
-            </div>
-
-            <div class="report-section">
-                <h3>Bu Aydaki Ciro</h3>
-                <p class="report-amount" id="monthly-revenue">0.00₺</p>
+            <div class="report-actions" style="margin-top: 20px; text-align: center;">
+                <button id="reset-all-revenue-button" class="reset-button"><i class="fas fa-redo"></i> Tüm Ciroları Sıfırla</button>
             </div>
         </div>
     </div>
@@ -96,37 +131,40 @@
     <div id="product-management-screen" class="screen">
         <div class="panel-section product-management">
             <button id="back-to-main-from-products-button" class="back-button">← Masalara Dön</button>
-            <h2 class="product-management-screen-title">Ürün Yönetimi</h2>
-
-            <div class="add-product-section">
-                <h3>Yeni Ürün Ekle</h3>
-                <div class="add-product-form">
-                    <input type="text" id="new-product-name" placeholder="Ürün Adı" class="product-input">
-                    <input type="number" id="new-product-price" placeholder="Fiyat (₺)" min="0" step="0.01" class="product-input">
-                    <button id="add-product-button" class="action-button add-product">Ürün Ekle</button>
-                </div>
+            <h2 class="order-screen-title">Ürün Yönetimi</h2>
+            <div class="add-product-form">
+                <input type="text" id="new-product-name" placeholder="Ürün Adı" required>
+                <input type="number" id="new-product-price" placeholder="Fiyatı (₺)" min="0.01" step="0.01" required>
+                <select id="new-product-category" required>
+                    <option value="">Kategori Seçiniz</option>
+                    <option value="hot-drinks">Sıcak İçecekler</option>
+                    <option value="cold-drinks">Soğuk İçecekler</option>
+                    <option value="desserts">Tatlılar</option>
+                    <option value="other">Diğer</option>
+                </select>
+                <button id="add-product-button" class="action-button success-button"><i class="fas fa-plus"></i> Ürün Ekle</button>
             </div>
-
-            <div class="existing-products-section">
+            <div class="product-list-management">
                 <h3>Mevcut Ürünler</h3>
-                <div id="product-management-list" class="product-management-list">
-                </div>
+                <ul id="product-management-list">
+                </ul>
             </div>
         </div>
     </div>
 
 </div>
-
-<div id="toast-container"></div>
 
 <div id="receipt-modal" class="modal">
     <div class="modal-content">
         <span class="close-button">&times;</span>
-        <div id="receipt-content" class="receipt-preview">
+        <h2>Fiş</h2>
+        <div id="receipt-content">
         </div>
-        <p class="print-instruction">Yazdırmak için **Ctrl + P** tuşlarına basın.</p>
+        <button id="print-receipt-modal-button" class="action-button info-button" style="margin-top: 20px;"><i class="fas fa-print"></i> Yazdır</button>
     </div>
 </div>
+
+<div id="toast-container"></div>
 
 <script src="script.js"></script>
 </body>

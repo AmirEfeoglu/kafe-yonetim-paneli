@@ -1,793 +1,707 @@
-// --- 1. DOM Elementlerini Seçme ---
-// Ekranlar ve genel elementler
-const mainScreen = document.getElementById("main-screen")
-const orderScreen = document.getElementById("order-screen")
-const reportScreen = document.getElementById("report-screen")
-const toastContainer = document.getElementById("toast-container")
+document.addEventListener('DOMContentLoaded', () => {
+    // --- 1. DOM Elementlerini Seçme ---
+    const tablesContainer = document.getElementById('tables-container');
+    const addTableIconButton = document.getElementById('add-table-icon-button');
+    const mainScreen = document.getElementById('main-screen');
+    const orderScreen = document.getElementById('order-screen');
+    const backToMainButton = document.getElementById('back-to-main-button');
+    const currentTableDisplay = document.getElementById('current-table-display');
+    const productList = document.getElementById('product-list');
+    const orderItems = document.getElementById('order-items');
+    const subtotalAmount = document.getElementById('subtotal-amount');
+    const discountAmount = document.getElementById('discount-amount');
+    const totalAmount = document.getElementById('total-amount');
+    const clearOrderButton = document.getElementById('clear-order-button');
+    const completeOrderButton = document.getElementById('complete-order-button');
+    const printReceiptButton = document.getElementById('print-receipt-button');
+    const receiptModal = document.getElementById('receipt-modal');
+    const receiptContent = document.getElementById('receipt-content');
+    const closeModalButton = document.querySelector('.modal .close-button');
+    const printReceiptModalButton = document.getElementById('print-receipt-modal-button');
 
-// Masa Ekranı elementleri
-const tablesContainer = document.getElementById("tables-container")
-const addTableIconButton = document.getElementById("add-table-icon-button")
-const showReportsButton = document.getElementById("show-reports-button")
-const dailyTotalRevenueAmountSpan = document.getElementById("daily-total-revenue-amount") // ID değişti
-const resetDailyRevenueButton = document.getElementById("reset-daily-revenue-button") // Yeni sıfırlama butonu
+    // Ciro Rapor Elementleri
+    const dailyTotalRevenueAmount = document.getElementById('daily-total-revenue-amount');
+    const resetDailyRevenueButton = document.getElementById('reset-daily-revenue-button'); // Ana ekrandaki günlük sıfırlama
+    const showReportsButton = document.getElementById('show-reports-button');
+    const reportScreen = document.getElementById('report-screen');
+    const backToMainFromReportsButton = document.getElementById('back-to-main-from-reports-button');
+    const dailyRevenueDisplay = document.getElementById('daily-revenue');
+    const dailyCashRevenueDisplay = document.getElementById('daily-cash-revenue');
+    const dailyCardRevenueDisplay = document.getElementById('daily-card-revenue');
+    // Yeni Haftalık ve Aylık Ciro Elementleri
+    const weeklyRevenueDisplay = document.getElementById('weekly-revenue');
+    const weeklyCashRevenueDisplay = document.getElementById('weekly-cash-revenue');
+    const weeklyCardRevenueDisplay = document.getElementById('weekly-card-revenue');
+    const monthlyRevenueDisplay = document.getElementById('monthly-revenue');
+    const monthlyCashRevenueDisplay = document.getElementById('monthly-cash-revenue');
+    const monthlyCardRevenueDisplay = document.getElementById('monthly-card-revenue');
+    const resetAllRevenueButton = document.getElementById('reset-all-revenue-button'); // Tüm ciroları sıfırlama butonu
 
-// Sipariş Ekranı elementleri
-const backToMainButton = document.getElementById("back-to-main-button")
-const currentTableDisplay = document.getElementById("current-table-display")
-const productList = document.getElementById("product-list")
-const orderItems = document.getElementById("order-items")
-const discountButtons = document.querySelectorAll(".discount-button")
-const appliedDiscountInfo = document.querySelector(".applied-discount-info")
-const appliedDiscountRateSpan = document.getElementById("applied-discount-rate")
-const discountAmountSpan = document.getElementById("discount-amount")
-const totalAmountSpan = document.getElementById("total-amount")
-const clearOrderButton = document.getElementById("clear-order-button")
-const printReceiptButton = document.getElementById("print-receipt-button")
-const completeOrderButton = document.getElementById("complete-order-button")
 
-// Rapor Ekranı elementleri
-const backToMainFromReportsButton = document.getElementById("back-to-main-from-reports-button")
-const dailyRevenueSpan = document.getElementById("daily-revenue")
-const weeklyRevenueSpan = document.getElementById("weekly-revenue")
-const monthlyRevenueSpan = document.getElementById("monthly-revenue")
+    const showProductsButton = document.getElementById('show-products-button');
+    const productManagementScreen = document.getElementById('product-management-screen');
+    const backToMainFromProductsButton = document.getElementById('back-to-main-from-products-button');
+    const newProductNameInput = document.getElementById('new-product-name');
+    const newProductPriceInput = document.getElementById('new-product-price');
+    const newProductCategorySelect = document.getElementById('new-product-category');
+    const addProductButton = document.getElementById('add-product-button');
+    const productManagementList = document.getElementById('product-management-list');
+    const discountButtons = document.querySelectorAll('.discount-button');
+    const appliedDiscountRate = document.getElementById('applied-discount-rate');
+    const customDiscountPercentageInput = document.getElementById('custom-discount-percentage');
+    const applyCustomDiscountButton = document.getElementById('apply-custom-discount-button');
+    const paymentMethodRadios = document.querySelectorAll('input[name="payment-method"]');
+    const productTabButtons = document.querySelectorAll('.product-tabs .tab-button');
+    const toastContainer = document.getElementById('toast-container');
 
-// Fiş Modalı elementleri
-const receiptModal = document.getElementById("receipt-modal")
-const closeReceiptModalButton = document.querySelector("#receipt-modal .close-button")
-const receiptContentArea = document.getElementById("receipt-content")
 
-// Ürün Yönetimi Ekranı elementleri
-const productManagementScreen = document.getElementById("product-management-screen")
-const showProductsButton = document.getElementById("show-products-button")
-const backToMainFromProductsButton = document.getElementById("back-to-main-from-products-button")
-const newProductNameInput = document.getElementById("new-product-name")
-const newProductPriceInput = document.getElementById("new-product-price")
-const addProductButton = document.getElementById("add-product-button")
-const productManagementList = document.getElementById("product-management-list")
+    // --- 2. Global Değişkenler ---
+    let tables = JSON.parse(localStorage.getItem('tables')) || {};
+    let products = JSON.parse(localStorage.getItem('products')) || [
+        { id: 'p001', name: 'Espresso', price: 45.00, category: 'hot-drinks' },
+        { id: 'p002', name: 'Latte', price: 60.00, category: 'hot-drinks' },
+        { id: 'p003', name: 'Americano', price: 50.00, category: 'hot-drinks' },
+        { id: 'p004', name: 'Mocha', price: 65.00, category: 'hot-drinks' },
+        { id: 'p005', name: 'Filtre Kahve', price: 40.00, category: 'hot-drinks' },
+        { id: 'p006', name: 'Türk Kahvesi', price: 35.00, category: 'hot-drinks' },
+        { id: 'p007', name: 'Buzlu Latte', price: 65.00, category: 'cold-drinks' },
+        { id: 'p008', name: 'Cold Brew', price: 60.00, category: 'cold-drinks' },
+        { id: 'p009', name: 'Iced Americano', price: 55.00, category: 'cold-drinks' },
+        { id: 'p010', name: 'Frappuccino', price: 70.00, category: 'cold-drinks' },
+        { id: 'p011', name: 'Limonata', price: 50.00, category: 'cold-drinks' },
+        { id: 'p012', name: 'Cheesecake', price: 80.00, category: 'desserts' },
+        { id: 'p013', name: 'Brownie', price: 70.00, category: 'desserts' },
+        { id: 'p014', name: 'Sufle', price: 75.00, category: 'desserts' },
+        { id: 'p015', name: 'Tiramisu', price: 85.00, category: 'desserts' }
+    ];
+    let currentTableId = null;
 
-// --- 2. Uygulama Durumunu Saklama ---
-// localStorage kullanarak sayfa yenilendiğinde verilerin kaybolmamasını sağlıyoruz.
-const tables = JSON.parse(localStorage.getItem("cafeTables")) || {}
-let currentTableId = null
-let appliedDiscount = 0
+    // Tüm tamamlanmış siparişleri (işlemleri) tutacak yeni dizi
+    // Her işlemde tarih, miktar, ödeme yöntemi bilgileri olacak
+    let transactions = JSON.parse(localStorage.getItem('transactions')) || [];
 
-// İşlem geçmişi (raporlama için)
-const transactions = JSON.parse(localStorage.getItem("cafeTransactions")) || []
+    // Son sıfırlama tarihlerini tutalım (Otomatik sıfırlama için)
+    let lastResetDates = JSON.parse(localStorage.getItem('lastResetDates')) || {
+        daily: new Date().toDateString(),
+        weekly: new Date().toISOString().substring(0, 10), // ISO tarih formatında haftanın başlangıcı (örneğin Pzt)
+        monthly: new Date().toISOString().substring(0, 7) // YYYY-MM formatında
+    };
 
-// YENİ: Günlük cironun en son ne zaman manuel olarak sıfırlandığını takip et.
-// Bu, 00:00'da otomatik sıfırlama ile karışmaması için kullanılacak.
-// Eğer değer yoksa, başlangıçta çok eski bir tarih olarak kabul edilebilir.
-let lastDailyManualResetDate = localStorage.getItem("lastDailyManualResetDate")
-    ? new Date(localStorage.getItem("lastDailyManualResetDate"))
-    : new Date(0) // Epoch zamanı, yani çok eski bir tarih
-
-// Ürün listesi - artık localStorage'dan yükleniyor
-let products = JSON.parse(localStorage.getItem("cafeProducts")) || [
-    { id: "americano", name: "Americano", price: 50 },
-    { id: "latte", name: "Latte", price: 60 },
-    { id: "espresso", name: "Espresso", price: 40 },
-    { id: "cappuccino", name: "Cappuccino", price: 65 },
-    { id: "mocha", name: "Mocha", price: 70 },
-    { id: "çay", name: "Çay", price: 25 },
-    { id: "bitkisel-çay", name: "Bitkisel Çay", price: 30 },
-    { id: "soda", name: "Soda", price: 30 },
-    { id: "limonata", name: "Limonata", price: 45 },
-    { id: "portakal-suyu", name: "Portakal Suyu", price: 55 },
-    { id: "cheesecake", name: "Cheesecake", price: 80 },
-    { id: "kurabiye", name: "Kurabiye", price: 35 },
-    { id: "sandviç", name: "Sandviç", price: 90 },
-    { id: "salata", name: "Salata", price: 110 },
-]
-
-// --- 3. Yardımcı Fonksiyonlar ---
-
-// Verileri localStorage'a kaydeder
-function saveState() {
-    localStorage.setItem("cafeTables", JSON.stringify(tables))
-    localStorage.setItem("cafeTransactions", JSON.stringify(transactions))
-    localStorage.setItem("cafeProducts", JSON.stringify(products))
-    localStorage.setItem("lastDailyManualResetDate", lastDailyManualResetDate.toISOString())
-}
-
-// Toplam hesabı hesaplar (iskontosuz)
-function calculateSubtotal(order) {
-    return order.reduce((sum, item) => sum + item.price * item.quantity, 0)
-}
-
-// Toplam hesabı iskonto ile hesaplar
-function calculateFinalTotal(subtotal, discountRate) {
-    if (isNaN(subtotal) || typeof subtotal !== "number") {
-        return 0
-    }
-    return subtotal * (1 - discountRate)
-}
-
-// Toast bildirimleri gösterme fonksiyonu
-function showToast(message, type = "info", duration = 3000) {
-    const toast = document.createElement("div")
-    toast.classList.add("toast", type)
-    toast.textContent = message
-    toastContainer.appendChild(toast)
-
-    setTimeout(() => {
-        toast.classList.add("show")
-    }, 10)
-
-    setTimeout(() => {
-        toast.classList.remove("show")
-        toast.addEventListener("transitionend", () => toast.remove())
-    }, duration)
-}
-
-// Ekranları değiştirme fonksiyonu
-function showScreen(screenToShow) {
-    mainScreen.classList.remove("active-screen")
-    orderScreen.classList.remove("active-screen")
-    reportScreen.classList.remove("active-screen")
-    productManagementScreen.classList.remove("active-screen")
-
-    if (screenToShow === "main") {
-        mainScreen.classList.add("active-screen")
-        renderTables()
-    } else if (screenToShow === "order") {
-        orderScreen.classList.add("active-screen")
-        renderProducts()
-        renderOrder()
-    } else if (screenToShow === "reports") {
-        reportScreen.classList.add("active-screen")
-        renderReports()
-    } else if (screenToShow === "products") {
-        productManagementScreen.classList.add("active-screen")
-        renderProductManagement()
-    }
-}
-
-// YENİ: Ana ekrandaki günlük ciro gösterimini günceller
-function updateDailyRevenueDisplay() {
-    const dailyRevenue = calculateCurrentDailyRevenue()
-    dailyTotalRevenueAmountSpan.textContent = dailyRevenue.toFixed(2)
-}
-
-// YENİ: Günlük ciroyu hesaplama fonksiyonu (hem rapor için hem de ana ekran için)
-function calculateCurrentDailyRevenue() {
-    const now = new Date()
-    const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0).getTime()
-
-    // Yalnızca manuel sıfırlama tarihinden sonraki veya aynı günkü işlemleri dikkate al.
-    // Eğer aynı gün manuel sıfırlama yapıldıysa, sadece o sıfırlamadan sonraki işlemleri al.
-    let effectiveStartTime = startOfDay
-    if (lastDailyManualResetDate && now.toDateString() === lastDailyManualResetDate.toDateString()) {
-        effectiveStartTime = lastDailyManualResetDate.getTime()
+    // --- 3. Yardımcı Fonksiyonlar ---
+    function generateUniqueId(prefix) {
+        return prefix + Date.now() + Math.floor(Math.random() * 1000);
     }
 
-    const currentDailyTransactions = transactions.filter(
-        (t) => t.timestamp >= effectiveStartTime && t.timestamp <= now.getTime(),
-    )
-    return currentDailyTransactions.reduce((sum, t) => sum + t.amount, 0)
-}
-
-// --- 4. Masa Yönetimi (Ana Ekran) ---
-
-function renderTables() {
-    tablesContainer.innerHTML = ""
-
-    if (Object.keys(tables).length === 0) {
-        for (let i = 1; i <= 5; i++) {
-            tables[i] = { id: i, name: `Masa ${i}`, order: [], discount: 0 }
+    function showScreen(screenId) {
+        document.querySelectorAll('.screen').forEach(screen => {
+            screen.classList.remove('active-screen');
+        });
+        document.getElementById(screenId).classList.add('active-screen');
+        if (screenId === 'main-screen') {
+            renderTables(); // Ana ekrana dönüldüğünde masa toplamlarını günceller
+        } else if (screenId === 'report-screen') {
+            updateRevenueDisplays(); // Rapor ekranına geçildiğinde tüm ciroları günceller
         }
-        saveState()
     }
 
-    const sortedTableIds = Object.keys(tables).sort((a, b) => Number.parseInt(a) - Number.parseInt(b))
+    function saveTables() {
+        localStorage.setItem('tables', JSON.stringify(tables));
+    }
 
-    sortedTableIds.forEach((tableId) => {
-        const table = tables[tableId]
-        const tableButton = document.createElement("button")
-        tableButton.classList.add("table-button")
-        tableButton.dataset.tableId = tableId
+    function saveProducts() {
+        localStorage.setItem('products', JSON.stringify(products));
+    }
 
-        const subtotal = calculateSubtotal(table.order)
-        const totalAfterDiscount = calculateFinalTotal(subtotal, table.discount)
+    function saveTransactions() {
+        localStorage.setItem('transactions', JSON.stringify(transactions));
+    }
 
-        const displayTotal = totalAfterDiscount > 0 ? `${totalAfterDiscount.toFixed(2)}₺` : "Boş"
+    function saveLastResetDates() {
+        localStorage.setItem('lastResetDates', JSON.stringify(lastResetDates));
+    }
 
-        tableButton.innerHTML = `Masa ${table.id} <br> <span class="table-total">${displayTotal}</span>`
+    // Ciroları hesaplayan ana fonksiyon
+    function calculateRevenue(period) {
+        const now = new Date();
+        let filteredTransactions = [];
 
-        const deleteButton = document.createElement("button")
-        deleteButton.classList.add("delete-table-button")
-        deleteButton.innerHTML = '<i class="fas fa-times"></i>'
-        deleteButton.title = `Masa ${table.id} Sil`
-        deleteButton.addEventListener("click", (event) => {
-            event.stopPropagation()
-            deleteTable(table.id)
-        })
-        tableButton.appendChild(deleteButton)
-
-        tablesContainer.appendChild(tableButton)
-
-        tableButton.addEventListener("click", () => {
-            currentTableId = tableId
-            appliedDiscount = tables[currentTableId].discount || 0
-            showScreen("order")
-        })
-    })
-}
-
-addTableIconButton.addEventListener("click", () => {
-    const existingTableIds = Object.keys(tables).map((id) => Number.parseInt(id))
-    const maxTableId = existingTableIds.length > 0 ? Math.max(...existingTableIds) : 0
-    const newTableId = maxTableId + 1
-
-    tables[newTableId] = { id: newTableId, name: `Masa ${newTableId}`, order: [], discount: 0 }
-    saveState()
-    renderTables()
-    showToast(`Masa ${newTableId} eklendi!`, "success")
-})
-
-function deleteTable(tableIdToDelete) {
-    if (confirm(`Masa ${tableIdToDelete}'yi silmek istediğinize emin misiniz? Siparişleri de silinecektir.`)) {
-        if (currentTableId === tableIdToDelete.toString()) {
-            currentTableId = null
-            appliedDiscount = 0
-            showScreen("main")
+        if (period === 'daily') {
+            filteredTransactions = transactions.filter(t => {
+                const transactionDate = new Date(t.date);
+                return transactionDate.toDateString() === now.toDateString();
+            });
+        } else if (period === 'weekly') {
+            const firstDayOfWeek = new Date(now.setDate(now.getDate() - now.getDay() + (now.getDay() === 0 ? -6 : 1))); // Pazartesi'yi haftanın ilk günü olarak al (Pazar ise bir önceki pazartesi)
+            firstDayOfWeek.setHours(0, 0, 0, 0); // Saati sıfırla
+            filteredTransactions = transactions.filter(t => {
+                const transactionDate = new Date(t.date);
+                return transactionDate >= firstDayOfWeek;
+            });
+        } else if (period === 'monthly') {
+            filteredTransactions = transactions.filter(t => {
+                const transactionDate = new Date(t.date);
+                return transactionDate.getMonth() === now.getMonth() && transactionDate.getFullYear() === now.getFullYear();
+            });
         }
-        delete tables[tableIdToDelete]
-        saveState()
-        renderTables()
-        showToast(`Masa ${tableIdToDelete} başarıyla silindi.`, "success")
-    }
-}
 
-// --- 5. Ürün Yönetimi (Sipariş Ekranı) ---
+        const total = filteredTransactions.reduce((sum, t) => sum + t.amount, 0);
+        const cash = filteredTransactions.reduce((sum, t) => sum + (t.paymentMethod === 'cash' ? t.amount : 0), 0);
+        const card = filteredTransactions.reduce((sum, t) => sum + (t.paymentMethod === 'card' ? t.amount : 0), 0);
 
-function renderProducts() {
-    productList.innerHTML = ""
-    products.forEach((product) => {
-        const productButton = document.createElement("button")
-        productButton.classList.add("product-button")
-        productButton.dataset.productId = product.id
-        productButton.dataset.price = product.price
-        productButton.innerHTML = `${product.name}<span>${product.price.toFixed(2)}₺</span>`
-        productList.appendChild(productButton)
-
-        productButton.addEventListener("click", () => {
-            addProductToOrder(product)
-        })
-    })
-}
-
-function addProductToOrder(product) {
-    if (!currentTableId || !tables[currentTableId]) {
-        showToast("Lütfen önce bir masa seçin!", "error")
-        return
+        return { total, cash, card };
     }
 
-    const currentTable = tables[currentTableId]
-    const existingItem = currentTable.order.find((item) => item.id === product.id)
+    // Ciro göstergelerini güncelleyen fonksiyon
+    function updateRevenueDisplays() {
+        const daily = calculateRevenue('daily');
+        const weekly = calculateRevenue('weekly');
+        const monthly = calculateRevenue('monthly');
 
-    if (existingItem) {
-        existingItem.quantity++
-    } else {
-        currentTable.order.push({
-            id: product.id,
-            name: product.name,
-            price: product.price,
-            quantity: 1,
-        })
+        dailyTotalRevenueAmount.textContent = daily.total.toFixed(2); // Ana ekran için
+        dailyRevenueDisplay.textContent = daily.total.toFixed(2) + '₺';
+        dailyCashRevenueDisplay.textContent = daily.cash.toFixed(2) + '₺';
+        dailyCardRevenueDisplay.textContent = daily.card.toFixed(2) + '₺';
+
+        weeklyRevenueDisplay.textContent = weekly.total.toFixed(2) + '₺';
+        weeklyCashRevenueDisplay.textContent = weekly.cash.toFixed(2) + '₺';
+        weeklyCardRevenueDisplay.textContent = weekly.card.toFixed(2) + '₺';
+
+        monthlyRevenueDisplay.textContent = monthly.total.toFixed(2) + '₺';
+        monthlyCashRevenueDisplay.textContent = monthly.cash.toFixed(2) + '₺';
+        monthlyCardRevenueDisplay.textContent = monthly.card.toFixed(2) + '₺';
     }
-    saveState()
-    renderOrder()
-    showToast(`${product.name} siparişe eklendi!`, "success")
-}
 
-// --- 6. Sipariş Yönetimi (Sipariş Ekranı) ---
+    function showToast(message, type = 'info') {
+        const toast = document.createElement('div');
+        toast.classList.add('toast', type);
+        toast.textContent = message;
+        toastContainer.appendChild(toast);
 
-function renderOrder() {
-    const currentTable = tables[currentTableId]
-    currentTableDisplay.textContent = currentTable.name
+        setTimeout(() => {
+            toast.remove();
+        }, 3000);
+    }
 
-    orderItems.innerHTML = ""
-    if (currentTable.order.length === 0) {
-        orderItems.innerHTML =
-            '<li style="text-align: center; color: var(--text-medium); padding: 20px;">Bu masada henüz sipariş yok.</li>'
-    } else {
-        currentTable.order.forEach((item) => {
-            const listItem = document.createElement("li")
+    // --- 4. Masa İşlemleri ---
+    function renderTables() {
+        tablesContainer.innerHTML = '';
+        if (Object.keys(tables).length === 0) {
+            tablesContainer.innerHTML = '<p class="empty-state">Henüz masa eklenmemiş. Lütfen yeni masa ekleyin.</p>';
+        }
+        Object.values(tables).forEach(table => {
+            const tableDiv = document.createElement('div');
+            tableDiv.classList.add('table-card');
+            const currentTableTotal = table.order && table.order.total !== undefined ? table.order.total : 0;
+            if (table.order && table.order.items.length > 0) {
+                tableDiv.classList.add('has-order');
+            }
+            tableDiv.dataset.id = table.id;
+            tableDiv.innerHTML = `
+                <h3>${table.name}</h3>
+                <p>Toplam: ${currentTableTotal.toFixed(2)}₺</p>
+                <div class="table-actions">
+                    <button class="open-table-button"><i class="fas fa-cash-register"></i></button>
+                    <button class="delete-table-button danger-button-small"><i class="fas fa-trash-alt"></i></button>
+                </div>
+            `;
+            tablesContainer.appendChild(tableDiv);
+        });
+    }
+
+    function addTable() {
+        const newTableId = generateUniqueId('t');
+        const newTableName = `Masa ${Object.keys(tables).length + 1}`;
+        tables[newTableId] = {
+            id: newTableId,
+            name: newTableName,
+            order: { items: [], subtotal: 0, discountRate: 0, discountAmount: 0, total: 0 }
+        };
+        saveTables();
+        renderTables();
+        showToast(`${newTableName} başarıyla eklendi!`, 'success');
+    }
+
+    function deleteTable(tableId) {
+        if (confirm('Masayı silmek istediğinizden emin misiniz?')) {
+            delete tables[tableId];
+            saveTables();
+            renderTables();
+            showToast('Masa başarıyla silindi.', 'success');
+        }
+    }
+
+    // --- 5. Ürün İşlemleri ---
+    function renderProducts(category = 'all') {
+        productList.innerHTML = '';
+        const filteredProducts = products.filter(p => category === 'all' || p.category === category);
+
+        if (filteredProducts.length === 0) {
+            productList.innerHTML = '<p class="empty-state">Bu kategoride ürün bulunamadı.</p>';
+            return;
+        }
+
+        filteredProducts.forEach(product => {
+            const productDiv = document.createElement('div');
+            productDiv.classList.add('product-card');
+            productDiv.dataset.id = product.id;
+            productDiv.innerHTML = `
+                <h4>${product.name}</h4>
+                <p>${product.price.toFixed(2)}₺</p>
+                <button class="add-to-order-button"><i class="fas fa-plus-circle"></i> Ekle</button>
+            `;
+            productList.appendChild(productDiv);
+        });
+    }
+
+    function renderProductManagementList() {
+        productManagementList.innerHTML = '';
+        if (products.length === 0) {
+            productManagementList.innerHTML = '<p class="empty-state">Henüz ürün eklenmemiş.</p>';
+            return;
+        }
+        products.forEach(product => {
+            const listItem = document.createElement('li');
+            listItem.dataset.id = product.id;
             listItem.innerHTML = `
-                <span class="item-info">
-                    ${item.name} 
-                    <div class="qty-controls">
-                        <button class="qty-button minus" data-product-id="${item.id}">-</button>
-                        <span class="item-quantity">${item.quantity}</span>
-                        <button class="qty-button plus" data-product-id="${item.id}">+</button>
-                    </div>
-                </span>
+                <span>${product.name} - ${product.price.toFixed(2)}₺ (${product.category})</span>
+                <button class="delete-product-button danger-button-small"><i class="fas fa-trash-alt"></i> Sil</button>
+            `;
+            productManagementList.appendChild(listItem);
+        });
+    }
+
+    function addProduct() {
+        const name = newProductNameInput.value.trim();
+        const price = parseFloat(newProductPriceInput.value);
+        const category = newProductCategorySelect.value;
+
+        if (!name || isNaN(price) || price <= 0 || !category) {
+            showToast('Lütfen ürün adı, geçerli fiyat ve kategori girin.', 'error');
+            return;
+        }
+
+        const newProductId = generateUniqueId('p');
+        products.push({ id: newProductId, name, price, category });
+        saveProducts();
+        renderProducts(document.querySelector('.product-tabs .tab-button.active')?.dataset.category || 'all');
+        renderProductManagementList();
+        newProductNameInput.value = '';
+        newProductPriceInput.value = '';
+        newProductCategorySelect.value = '';
+        showToast('Ürün başarıyla eklendi!', 'success');
+    }
+
+    function deleteProduct(productId) {
+        if (confirm('Ürünü silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.')) {
+            products = products.filter(p => p.id !== productId);
+            saveProducts();
+            renderProducts(document.querySelector('.product-tabs .tab-button.active')?.dataset.category || 'all');
+            renderProductManagementList();
+            showToast('Ürün başarıyla silindi.', 'success');
+        }
+    }
+
+    // --- 6. Sipariş İşlemleri ---
+    function renderOrderDetails() {
+        const table = tables[currentTableId];
+        if (!table) return;
+
+        orderItems.innerHTML = '';
+        if (table.order.items.length === 0) {
+            orderItems.innerHTML = '<p class="empty-state">Bu masada henüz sipariş yok.</p>';
+        }
+
+        table.order.items.forEach(item => {
+            const listItem = document.createElement('li');
+            listItem.classList.add('order-item');
+            listItem.dataset.productId = item.productId;
+            listItem.innerHTML = `
+                <span>${item.name} x ${item.quantity}</span>
                 <span class="item-price">${(item.price * item.quantity).toFixed(2)}₺</span>
-            `
-            orderItems.appendChild(listItem)
-        })
+                <div class="item-actions">
+                    <button class="decrease-quantity-button"><i class="fas fa-minus-circle"></i></button>
+                    <button class="increase-quantity-button"><i class="fas fa-plus-circle"></i></button>
+                    <button class="remove-item-button danger-button-small"><i class="fas fa-trash-alt"></i></button>
+                </div>
+            `;
+            orderItems.appendChild(listItem);
+        });
+
+        subtotalAmount.textContent = table.order.subtotal.toFixed(2) + '₺';
+        discountAmount.textContent = table.order.discountAmount.toFixed(2) + '₺';
+        totalAmount.textContent = table.order.total.toFixed(2) + '₺';
+        appliedDiscountRate.textContent = `${(table.order.discountRate * 100).toFixed(0)}%`;
+        customDiscountPercentageInput.value = (table.order.discountRate * 100).toFixed(0);
     }
 
-    const subtotal = calculateSubtotal(currentTable.order)
-    const discountAmount = subtotal * appliedDiscount
-    const finalTotal = calculateFinalTotal(subtotal, appliedDiscount)
+    function calculateOrderTotals() {
+        const table = tables[currentTableId];
+        if (!table) return;
 
-    totalAmountSpan.textContent = finalTotal.toFixed(2)
-    appliedDiscountRateSpan.textContent = `${(appliedDiscount * 100).toFixed(0)}%`
-    discountAmountSpan.textContent = discountAmount.toFixed(2)
+        let subtotal = table.order.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+        let discountAmountValue = subtotal * table.order.discountRate;
+        let total = subtotal - discountAmountValue;
 
-    if (appliedDiscount > 0) {
-        appliedDiscountInfo.style.display = "block"
-    } else {
-        appliedDiscountInfo.style.display = "none"
+        table.order.subtotal = subtotal;
+        table.order.discountAmount = discountAmountValue;
+        table.order.total = total;
+
+        saveTables();
+        renderOrderDetails();
+        renderTables(); // Ana ekrandaki masa toplamlarını günceller
     }
 
-    discountButtons.forEach((button) => {
-        button.classList.remove("active")
-        const buttonRate = Number.parseFloat(button.dataset.discountRate)
-        if (!isNaN(buttonRate) && buttonRate === appliedDiscount) {
-            button.classList.add("active")
-        } else if (button.classList.contains("reset-discount") && appliedDiscount === 0) {
-            button.classList.add("active")
-        }
-    })
+    function addProductToOrder(productId) {
+        const table = tables[currentTableId];
+        if (!table) return;
 
-    document.querySelectorAll(".qty-button").forEach((button) => {
-        button.onclick = (event) => {
-            const productId = event.target.dataset.productId
-            if (event.target.classList.contains("plus")) {
-                changeItemQuantity(productId, 1)
-            } else if (event.target.classList.contains("minus")) {
-                changeItemQuantity(productId, -1)
-            }
-        }
-    })
-}
+        const product = products.find(p => p.id === productId);
+        if (!product) return;
 
-function changeItemQuantity(productId, change) {
-    const currentTable = tables[currentTableId]
-    const itemIndex = currentTable.order.findIndex((item) => item.id === productId)
+        const existingItem = table.order.items.find(item => item.productId === productId);
 
-    if (itemIndex > -1) {
-        currentTable.order[itemIndex].quantity += change
-        if (currentTable.order[itemIndex].quantity <= 0) {
-            currentTable.order.splice(itemIndex, 1)
-            showToast(`${products.find((p) => p.id === productId).name} siparişten kaldırıldı.`, "error")
+        if (existingItem) {
+            existingItem.quantity++;
         } else {
-            showToast(`${products.find((p) => p.id === productId).name} adedi güncellendi.`, "info")
+            table.order.items.push({
+                productId: product.id,
+                name: product.name,
+                price: product.price,
+                quantity: 1
+            });
         }
-        tables[currentTableId].discount = appliedDiscount
-        saveState()
-        renderOrder()
+        calculateOrderTotals();
+        showToast(`${product.name} siparişe eklendi.`, 'info');
     }
-}
 
-// --- İskonto Uygulama ---
-discountButtons.forEach((button) => {
-    button.addEventListener("click", (event) => {
-        if (event.target.classList.contains("reset-discount")) {
-            appliedDiscount = 0
-            showToast("İskonto sıfırlandı.", "info")
-        } else {
-            const rate = Number.parseFloat(event.target.dataset.discountRate)
-            appliedDiscount = rate
-            showToast(`%${(rate * 100).toFixed(0)} iskonto uygulandı.`, "info")
+    function decreaseQuantity(productId) {
+        const table = tables[currentTableId];
+        if (!table) return;
+
+        const existingItemIndex = table.order.items.findIndex(item => item.productId === productId);
+
+        if (existingItemIndex > -1) {
+            if (table.order.items[existingItemIndex].quantity > 1) {
+                table.order.items[existingItemIndex].quantity--;
+            } else {
+                table.order.items.splice(existingItemIndex, 1);
+            }
+            calculateOrderTotals();
+            showToast('Ürün miktarı azaltıldı.', 'info');
         }
-        tables[currentTableId].discount = appliedDiscount
-        saveState()
-        renderOrder()
-    })
-})
-
-// --- Aksiyon Butonları ---
-
-clearOrderButton.addEventListener("click", () => {
-    const currentTable = tables[currentTableId]
-    if (currentTable.order.length === 0) {
-        showToast(`Bu masada temizlenecek bir sipariş bulunmuyor.`, "info")
-        return
-    }
-    if (confirm(`${currentTable.name} siparişini tamamen temizlemek istediğinize emin misiniz?`)) {
-        currentTable.order = []
-        currentTable.discount = 0
-        appliedDiscount = 0
-        saveState()
-        renderOrder()
-        showToast(`${currentTable.name} siparişi temizlendi!`, "success")
-    }
-})
-
-printReceiptButton.addEventListener("click", () => {
-    const currentTable = tables[currentTableId]
-    if (currentTable.order.length === 0) {
-        showToast(`Bu masada fiş çıkarılacak sipariş bulunmuyor.`, "info")
-        return
     }
 
-    const subtotal = calculateSubtotal(currentTable.order)
-    const finalTotal = calculateFinalTotal(subtotal, currentTable.discount)
-    const discountAmount = subtotal * currentTable.discount
+    function increaseQuantity(productId) {
+        const table = tables[currentTableId];
+        if (!table) return;
 
-    let receiptHtml = `
-        <div class="receipt-header">
-            <h2>${currentTable.name} Fişi</h2>
-            <p>Tarih: ${new Date().toLocaleDateString("tr-TR")}</p>
-            <p>Saat: ${new Date().toLocaleTimeString("tr-TR", { hour: "2-digit", minute: "2-digit" })}</p>
-            <p class="receipt-line">---------------------------------</p>
-        </div>
-        <div class="receipt-items">
-            <ul class="receipt-item-list">
-    `
-    currentTable.order.forEach((item) => {
+        const existingItemIndex = table.order.items.findIndex(item => item.productId === productId);
+
+        if (existingItemIndex > -1) {
+            table.order.items[existingItemIndex].quantity++;
+            calculateOrderTotals();
+            showToast('Ürün miktarı artırıldı.', 'info');
+        }
+    }
+
+    function removeItemFromOrder(productId) {
+        const table = tables[currentTableId];
+        if (!table) return;
+
+        table.order.items = table.order.items.filter(item => item.productId !== productId);
+        calculateOrderTotals();
+        showToast('Ürün siparişten silindi.', 'warning');
+    }
+
+    function clearOrder() {
+        if (confirm('Siparişi tamamen temizlemek istediğinizden emin misiniz?')) {
+            const table = tables[currentTableId];
+            if (table) {
+                table.order = { items: [], subtotal: 0, discountRate: 0, discountAmount: 0, total: 0 };
+                saveTables();
+                renderOrderDetails();
+                renderTables();
+                showToast('Sipariş temizlendi.', 'warning');
+            }
+        }
+    }
+
+    function applyDiscount(discountRate) {
+        const table = tables[currentTableId];
+        if (!table) return;
+        table.order.discountRate = discountRate;
+        calculateOrderTotals();
+        showToast(`%${(discountRate * 100).toFixed(0)} iskonto uygulandı.`, 'info');
+    }
+
+    function applyCustomDiscount() {
+        const discountPercentage = parseFloat(customDiscountPercentageInput.value);
+        if (isNaN(discountPercentage) || discountPercentage < 0 || discountPercentage > 100) {
+            showToast('Lütfen 0 ile 100 arasında geçerli bir iskonto yüzdesi girin.', 'error');
+            return;
+        }
+        const discountRate = discountPercentage / 100;
+        applyDiscount(discountRate);
+    }
+
+    function completeOrder() {
+        const table = tables[currentTableId];
+        if (!table || table.order.items.length === 0) {
+            showToast('Sipariş tamamlamak için ürün eklemelisiniz.', 'error');
+            return;
+        }
+
+        if (confirm(`${table.name} için siparişi ${table.order.total.toFixed(2)}₺ ile tamamlamak istediğinizden emin misiniz?`)) {
+            const selectedPaymentMethod = document.querySelector('input[name="payment-method"]:checked').value;
+            const totalAmount = table.order.total;
+
+            // İşlemi transactions dizisine ekle
+            transactions.push({
+                id: generateUniqueId('trn'),
+                date: new Date().toISOString(), // ISO formatında tarih ve saat
+                amount: totalAmount,
+                paymentMethod: selectedPaymentMethod,
+                items: table.order.items // Sipariş detaylarını da kaydedebiliriz
+            });
+            saveTransactions(); // İşlemleri kaydet
+
+            // Masayı sıfırla
+            table.order = { items: [], subtotal: 0, discountRate: 0, discountAmount: 0, total: 0 };
+            saveTables();
+            renderTables();
+            updateRevenueDisplays(); // Ciroları güncelle
+            showToast(`${table.name} siparişi başarıyla tamamlandı!`, 'success');
+            showScreen('main-screen');
+        }
+    }
+
+    function printReceipt() {
+        const table = tables[currentTableId];
+        if (!table || table.order.items.length === 0) {
+            showToast('Fiş yazdırmak için siparişte ürün olmalı.', 'error');
+            return;
+        }
+
+        let receiptHtml = `
+            <h3>Söz Coffe - Fiş</h3>
+            <p>Masa: ${table.name}</p>
+            <p>Tarih: ${new Date().toLocaleDateString('tr-TR')}</p>
+            <p>Saat: ${new Date().toLocaleTimeString('tr-TR')}</p>
+            <hr>
+            <h4>Ürünler:</h4>
+            <ul>
+        `;
+        table.order.items.forEach(item => {
+            receiptHtml += `<li>${item.name} x ${item.quantity} - ${(item.price * item.quantity).toFixed(2)}₺</li>`;
+        });
+        receiptHtml += `</ul><hr>`;
         receiptHtml += `
-                <li class="receipt-item">
-                    <span class="qty-name">${item.name} (x${item.quantity})</span>
-                    <span class="item-total">${(item.price * item.quantity).toFixed(2)}₺</span>
-                </li>
-        `
-    })
-    receiptHtml += `
-            </ul>
-        </div>
-        <div class="receipt-totals">
-            <div>Ara Toplam: <span>${subtotal.toFixed(2)}₺</span></div>
-    `
-    if (currentTable.discount > 0) {
-        receiptHtml += `
-            <div>İskonto (${(currentTable.discount * 100).toFixed(0)}%): <span>-${discountAmount.toFixed(2)}₺</span></div>
-        `
-    }
-    receiptHtml += `
-            <div class="final-total">TOPLAM: <span>${finalTotal.toFixed(2)}₺</span></div>
-        </div>
-        <div class="receipt-footer">
-            <p class="receipt-line">---------------------------------</p>
-            <p style="text-align: center;">Bizi Tercih Ettiğiniz İçin Teşekkür Ederiz!</p>
-        </div>
-    `
+            <p>Ara Toplam: ${table.order.subtotal.toFixed(2)}₺</p>
+            <p>Uygulanan İskonto: %${(table.order.discountRate * 100).toFixed(0)}</p>
+            <p>İskonto Tutarı: ${table.order.discountAmount.toFixed(2)}₺</p>
+            <p><strong>Toplam Tutar: ${table.order.total.toFixed(2)}₺</strong></p>
+            <p>Ödeme Yöntemi: ${document.querySelector('input[name="payment-method"]:checked').value === 'cash' ? 'Nakit' : 'Kart'}</p>
+            <hr>
+            <p style="text-align: center;">Afiyet Olsun!</p>
+        `;
 
-    receiptContentArea.innerHTML = receiptHtml
-    receiptModal.style.display = "flex"
-    showToast(`${currentTable.name} için fiş önizlemesi hazır.`, "info")
-})
-
-closeReceiptModalButton.addEventListener("click", () => {
-    receiptModal.style.display = "none"
-})
-
-window.addEventListener("click", (event) => {
-    if (event.target === receiptModal) {
-        receiptModal.style.display = "none"
-    }
-})
-
-completeOrderButton.addEventListener("click", () => {
-    const currentTable = tables[currentTableId]
-    const subtotal = calculateSubtotal(currentTable.order)
-    const finalTotal = calculateFinalTotal(subtotal, currentTable.discount)
-
-    if (currentTable.order.length === 0) {
-        showToast(`${currentTable.name} için tamamlanacak bir sipariş bulunmuyor.`, "info")
-        return
+        receiptContent.innerHTML = receiptHtml;
+        receiptModal.style.display = 'block';
     }
 
-    if (confirm(`${currentTable.name} siparişi ${finalTotal.toFixed(2)}₺ ile tamamlanacak. Onaylıyor musunuz?`)) {
-        // Ciroya ekleme artık transactions üzerinden yapılacak.
-        // totalRevenue değişkeni kaldırıldı.
+    // --- 7. Otomatik Ciro Sıfırlama ve Yönetim ---
+    function checkAndResetRevenuesAutomatically() {
+        const now = new Date();
 
-        // İşlem kaydını oluştur ve ekle
-        transactions.push({
-            table: currentTable.name,
-            amount: finalTotal,
-            timestamp: new Date().getTime(), // İşlemin kaydedildiği anın zaman damgası
-        })
-
-        showToast(`${currentTable.name} siparişi ${finalTotal.toFixed(2)}₺ ile başarıyla tamamlandı!`, "success")
-
-        currentTable.order = []
-        currentTable.discount = 0
-        appliedDiscount = 0
-
-        saveState()
-        showScreen("main")
-    }
-})
-
-// --- Geri Dön Butonu ---
-backToMainButton.addEventListener("click", () => {
-    showScreen("main")
-    currentTableId = null
-    appliedDiscount = 0
-})
-
-// --- Raporlama Fonksiyonları ve Butonları ---
-
-showReportsButton.addEventListener("click", () => {
-    showScreen("reports")
-})
-
-backToMainFromReportsButton.addEventListener("click", () => {
-    showScreen("main")
-})
-
-function renderReports() {
-    const now = new Date()
-
-    // Günlük Ciro
-    const dailyRevenue = calculateCurrentDailyRevenue() // Ortak fonksiyonu kullan
-    dailyRevenueSpan.textContent = dailyRevenue.toFixed(2) + "₺"
-
-    // Haftalık Ciro (Pazartesi'den Pazara)
-    const dayOfWeek = now.getDay() // Pazar 0, Pazartesi 1, ... Cumartesi 6
-    const diff = now.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1) // Pazar ise önceki Pazartesi, değilse bu haftanın Pazartesi'si
-    const startOfWeek = new Date(now.getFullYear(), now.getMonth(), diff, 0, 0, 0).getTime()
-    const endOfWeek = startOfWeek + 7 * 24 * 60 * 60 * 1000 - 1 // 7 gün sonrası eksi 1 milisaniye
-
-    const weeklyRevenue = transactions
-        .filter((t) => t.timestamp >= startOfWeek && t.timestamp <= endOfWeek)
-        .reduce((sum, t) => sum + t.amount, 0)
-    weeklyRevenueSpan.textContent = weeklyRevenue.toFixed(2) + "₺"
-
-    // Aylık Ciro
-    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0).getTime()
-    const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59).getTime() // Sonraki ayın 0. günü = bu ayın son günü
-    const monthlyRevenue = transactions
-        .filter((t) => t.timestamp >= startOfMonth && t.timestamp <= endOfMonth)
-        .reduce((sum, t) => sum + t.amount, 0)
-    monthlyRevenueSpan.textContent = monthlyRevenue.toFixed(2) + "₺"
-}
-
-// --- Ürün Yönetimi Fonksiyonları ---
-
-function renderProductManagement() {
-    productManagementList.innerHTML = ""
-
-    if (products.length === 0) {
-        productManagementList.innerHTML =
-            '<p style="text-align: center; color: var(--text-medium); padding: 40px;">Henüz ürün bulunmuyor. Yukarıdaki formu kullanarak yeni ürün ekleyebilirsiniz.</p>'
-        return
-    }
-
-    products.forEach((product) => {
-        const productItem = document.createElement("div")
-        productItem.classList.add("product-management-item")
-        productItem.dataset.productId = product.id
-
-        productItem.innerHTML = `
-      <div class="product-info">
-        <div class="product-details">
-          <div class="product-name">${product.name}</div>
-          <div class="product-price">${product.price.toFixed(2)}₺</div>
-        </div>
-        <div class="product-actions">
-          <button class="edit-product-button">
-            <i class="fas fa-edit"></i> Düzenle
-          </button>
-          <button class="delete-product-button">
-            <i class="fas fa-trash"></i> Sil
-          </button>
-        </div>
-      </div>
-      <div class="edit-form">
-        <div class="form-inputs">
-          <input type="text" class="edit-name-input" value="${product.name}" placeholder="Ürün Adı">
-          <input type="number" class="edit-price-input" value="${product.price}" min="0" step="0.01" placeholder="Fiyat">
-        </div>
-        <div class="form-buttons">
-          <button class="save-product-button">Kaydet</button>
-          <button class="cancel-edit-button">İptal</button>
-        </div>
-      </div>
-    `
-
-        productManagementList.appendChild(productItem)
-    })
-
-    // Event listeners for edit and delete buttons
-    document.querySelectorAll(".edit-product-button").forEach((button) => {
-        button.addEventListener("click", (e) => {
-            const productItem = e.target.closest(".product-management-item")
-            enterEditMode(productItem)
-        })
-    })
-
-    document.querySelectorAll(".delete-product-button").forEach((button) => {
-        button.addEventListener("click", (e) => {
-            const productItem = e.target.closest(".product-management-item")
-            const productId = productItem.dataset.productId
-            deleteProduct(productId)
-        })
-    })
-
-    document.querySelectorAll(".save-product-button").forEach((button) => {
-        button.addEventListener("click", (e) => {
-            const productItem = e.target.closest(".product-management-item")
-            saveProductEdit(productItem)
-        })
-    })
-
-    document.querySelectorAll(".cancel-edit-button").forEach((button) => {
-        button.addEventListener("click", (e) => {
-            const productItem = e.target.closest(".product-management-item")
-            exitEditMode(productItem)
-        })
-    })
-}
-
-function generateProductId(name) {
-    return name
-        .toLowerCase()
-        .replace(/ç/g, "c")
-        .replace(/ğ/g, "g")
-        .replace(/ı/g, "i")
-        .replace(/ö/g, "o")
-        .replace(/ş/g, "s")
-        .replace(/ü/g, "u")
-        .replace(/[^a-z0-9]/g, "-")
-        .replace(/-+/g, "-")
-        .replace(/^-|-$/g, "")
-}
-
-function addNewProduct() {
-    const name = newProductNameInput.value.trim()
-    const price = Number.parseFloat(newProductPriceInput.value)
-
-    if (!name) {
-        showToast("Lütfen ürün adını girin!", "error")
-        return
-    }
-
-    if (isNaN(price) || price <= 0) {
-        showToast("Lütfen geçerli bir fiyat girin!", "error")
-        return
-    }
-
-    const id = generateProductId(name)
-
-    // Check if product already exists
-    if (products.find((p) => p.id === id)) {
-        showToast("Bu isimde bir ürün zaten mevcut!", "error")
-        return
-    }
-
-    const newProduct = {
-        id: id,
-        name: name,
-        price: price,
-    }
-
-    products.push(newProduct)
-    saveState()
-    renderProductManagement()
-
-    // Clear form
-    newProductNameInput.value = ""
-    newProductPriceInput.value = ""
-
-    showToast(`${name} başarıyla eklendi!`, "success")
-}
-
-function deleteProduct(productId) {
-    const product = products.find((p) => p.id === productId)
-    if (!product) return
-
-    if (confirm(`"${product.name}" ürünü silmek istediğinize emin misiniz? Bu işlem geri alınamaz.`)) {
-        // Check if product is used in any existing orders
-        let isUsedInOrders = false
-        Object.values(tables).forEach((table) => {
-            if (table.order.some((item) => item.id === productId)) {
-                isUsedInOrders = true
-            }
-        })
-
-        if (isUsedInOrders) {
-            if (
-                !confirm(
-                    "Bu ürün mevcut siparişlerde kullanılıyor. Silmek istediğinize emin misiniz? Mevcut siparişlerden de kaldırılacak.",
-                )
-            ) {
-                return
-            }
-
-            // Remove from all existing orders
-            Object.values(tables).forEach((table) => {
-                table.order = table.order.filter((item) => item.id !== productId)
-            })
+        // Günlük sıfırlama
+        const lastDaily = new Date(lastResetDates.daily);
+        if (now.toDateString() !== lastDaily.toDateString()) {
+            transactions = transactions.filter(t => new Date(t.date).toDateString() === now.toDateString());
+            saveTransactions();
+            lastResetDates.daily = now.toDateString();
+            saveLastResetDates();
+            showToast('Günlük ciro otomatik olarak sıfırlandı.', 'info');
         }
 
-        products = products.filter((p) => p.id !== productId)
-        saveState()
-        renderProductManagement()
-        showToast(`${product.name} başarıyla silindi!`, "success")
-    }
-}
+        // Haftalık sıfırlama (Pazartesi'yi haftanın başlangıcı olarak kabul ederiz)
+        const currentWeekStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - (now.getDay() === 0 ? 6 : now.getDay() - 1));
+        currentWeekStart.setHours(0,0,0,0);
+        const lastWeekly = new Date(lastResetDates.weekly);
 
-function enterEditMode(productItem) {
-    productItem.classList.add("editing")
-}
+        if (currentWeekStart.toDateString() !== lastWeekly.toDateString()) {
+            // Sadece mevcut haftanın işlemlerini tut
+            transactions = transactions.filter(t => new Date(t.date) >= currentWeekStart);
+            saveTransactions();
+            lastResetDates.weekly = currentWeekStart.toISOString().substring(0, 10);
+            saveLastResetDates();
+            showToast('Haftalık ciro otomatik olarak sıfırlandı.', 'info');
+        }
 
-function exitEditMode(productItem) {
-    productItem.classList.remove("editing")
-}
 
-function saveProductEdit(productItem) {
-    const productId = productItem.dataset.productId
-    const nameInput = productItem.querySelector(".edit-name-input")
-    const priceInput = productItem.querySelector(".edit-price-input")
+        // Aylık sıfırlama
+        const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+        currentMonthStart.setHours(0,0,0,0);
+        const lastMonthly = new Date(lastResetDates.monthly + '-01'); // YYYY-MM'den Date objesi oluştur
 
-    const newName = nameInput.value.trim()
-    const newPrice = Number.parseFloat(priceInput.value)
+        if (currentMonthStart.toDateString() !== lastMonthly.toDateString()) {
+            // Sadece mevcut ayın işlemlerini tut
+            transactions = transactions.filter(t => new Date(t.date) >= currentMonthStart);
+            saveTransactions();
+            lastResetDates.monthly = now.toISOString().substring(0, 7);
+            saveLastResetDates();
+            showToast('Aylık ciro otomatik olarak sıfırlandı.', 'info');
+        }
 
-    if (!newName) {
-        showToast("Lütfen ürün adını girin!", "error")
-        return
-    }
-
-    if (isNaN(newPrice) || newPrice <= 0) {
-        showToast("Lütfen geçerli bir fiyat girin!", "error")
-        return
-    }
-
-    const product = products.find((p) => p.id === productId)
-    if (!product) return
-
-    const oldName = product.name
-    product.name = newName
-    product.price = newPrice
-
-    // Update existing orders with new price and name
-    Object.values(tables).forEach((table) => {
-        table.order.forEach((item) => {
-            if (item.id === productId) {
-                item.name = newName
-                item.price = newPrice
-            }
-        })
-    })
-
-    saveState()
-    renderProductManagement()
-    showToast(`${oldName} başarıyla güncellendi!`, "success")
-}
-
-// Event Listeners for Product Management
-showProductsButton.addEventListener("click", () => {
-    showScreen("products")
-})
-
-backToMainFromProductsButton.addEventListener("click", () => {
-    showScreen("main")
-})
-
-addProductButton.addEventListener("click", addNewProduct)
-
-// Allow Enter key to add product
-newProductNameInput.addEventListener("keypress", (e) => {
-    if (e.key === "Enter") {
-        newProductPriceInput.focus()
-    }
-})
-
-newProductPriceInput.addEventListener("keypress", (e) => {
-    if (e.key === "Enter") {
-        addNewProduct()
-    }
-})
-
-// --- 7. Uygulamayı Başlatma ---
-// Sayfa yüklendiğinde bu fonksiyonları çağırarak paneli başlatıyoruz.
-document.addEventListener("DOMContentLoaded", () => {
-    // Otomatik günlük sıfırlama kontrolü
-    const now = new Date()
-    const lastResetDay = new Date(lastDailyManualResetDate)
-
-    // Eğer son manuel sıfırlama bugünden önceyse, otomatik sıfırlama yap.
-    // Yani gece 00:00'dan sonra ilk açılışta veya ilk işlemde.
-    if (now.toDateString() !== lastResetDay.toDateString()) {
-        lastDailyManualResetDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0) // Bugünün başlangıcına ayarla
-        saveState() // Bu sıfırlama tarihini kaydet
+        updateRevenueDisplays(); // Ciroları otomatik sıfırlamadan sonra güncelle
     }
 
-    showScreen("main")
-})
+
+    function resetDailyRevenueManually() {
+        if (confirm('Günlük ciroyu sıfırlamak istediğinizden emin misiniz? Bu işlem, günlük ciro verilerini sıfırlar.')) {
+            const now = new Date();
+            // Sadece bugüne ait olmayan işlemleri tut
+            transactions = transactions.filter(t => new Date(t.date).toDateString() !== now.toDateString());
+            saveTransactions();
+            lastResetDates.daily = now.toDateString(); // Sıfırlama tarihini bugüne ayarla
+            saveLastResetDates();
+            updateRevenueDisplays();
+            showToast('Günlük ciro başarıyla sıfırlandı.', 'info');
+        }
+    }
+
+    function resetAllRevenues() {
+        if (confirm('Tüm ciro verilerini (Günlük, Haftalık, Aylık) sıfırlamak istediğinizden emin misiniz? Bu işlem geri alınamaz!')) {
+            transactions = []; // Tüm işlemleri sil
+            saveTransactions();
+
+            const now = new Date();
+            lastResetDates = {
+                daily: now.toDateString(),
+                weekly: new Date(now.getFullYear(), now.getMonth(), now.getDate() - (now.getDay() === 0 ? 6 : now.getDay() - 1)).toISOString().substring(0, 10),
+                monthly: now.toISOString().substring(0, 7)
+            };
+            saveLastResetDates();
+            updateRevenueDisplays();
+            showToast('Tüm ciro verileri başarıyla sıfırlandı!', 'success');
+        }
+    }
+
+
+    // --- 8. Olay Dinleyicileri ---
+    addTableIconButton.addEventListener('click', addTable);
+
+    tablesContainer.addEventListener('click', (e) => {
+        const tableCard = e.target.closest('.table-card');
+        if (!tableCard) return;
+
+        const tableId = tableCard.dataset.id;
+
+        if (e.target.closest('.open-table-button')) {
+            currentTableId = tableId;
+            currentTableDisplay.textContent = tables[currentTableId].name;
+            renderOrderDetails();
+            renderProducts('all');
+            productTabButtons.forEach(btn => btn.classList.remove('active'));
+            document.querySelector('.tab-button[data-category="all"]').classList.add('active');
+            showScreen('order-screen');
+        } else if (e.target.closest('.delete-table-button')) {
+            deleteTable(tableId);
+        }
+    });
+
+    backToMainButton.addEventListener('click', () => showScreen('main-screen'));
+
+    productList.addEventListener('click', (e) => {
+        const addButton = e.target.closest('.add-to-order-button');
+        if (addButton) {
+            const productId = addButton.parentElement.dataset.id;
+            addProductToOrder(productId);
+        }
+    });
+
+    orderItems.addEventListener('click', (e) => {
+        const listItem = e.target.closest('.order-item');
+        if (!listItem) return;
+
+        const productId = listItem.dataset.productId;
+
+        if (e.target.closest('.decrease-quantity-button')) {
+            decreaseQuantity(productId);
+        } else if (e.target.closest('.increase-quantity-button')) {
+            increaseQuantity(productId);
+        } else if (e.target.closest('.remove-item-button')) {
+            removeItemFromOrder(productId);
+        }
+    });
+
+    clearOrderButton.addEventListener('click', clearOrder);
+    completeOrderButton.addEventListener('click', completeOrder);
+    printReceiptButton.addEventListener('click', printReceipt);
+
+    closeModalButton.addEventListener('click', () => {
+        receiptModal.style.display = 'none';
+    });
+
+    window.addEventListener('click', (e) => {
+        if (e.target == receiptModal) {
+            receiptModal.style.display = 'none';
+        }
+    });
+
+    printReceiptModalButton.addEventListener('click', () => {
+        const printContent = receiptContent.innerHTML;
+        const originalBody = document.body.innerHTML;
+        document.body.innerHTML = printContent;
+        window.print();
+        document.body.innerHTML = originalBody;
+        location.reload();
+    });
+
+    resetDailyRevenueButton.addEventListener('click', resetDailyRevenueManually); // Manuel günlük sıfırlama
+    resetAllRevenueButton.addEventListener('click', resetAllRevenues); // Tüm ciroları sıfırlama
+
+    showReportsButton.addEventListener('click', () => {
+        updateRevenueDisplays(); // Rapor ekranına geçerken güncel verileri göster
+        showScreen('report-screen');
+    });
+    backToMainFromReportsButton.addEventListener('click', () => showScreen('main-screen'));
+
+    showProductsButton.addEventListener('click', () => {
+        renderProductManagementList();
+        showScreen('product-management-screen');
+    });
+    backToMainFromProductsButton.addEventListener('click', () => showScreen('main-screen'));
+
+    addProductButton.addEventListener('click', addProduct);
+
+    productManagementList.addEventListener('click', (e) => {
+        const deleteButton = e.target.closest('.delete-product-button');
+        if (deleteButton) {
+            const productId = deleteButton.parentElement.dataset.id;
+            deleteProduct(productId);
+        }
+    });
+
+    discountButtons.forEach(button => {
+        button.addEventListener('click', (e) => {
+            const discountRate = parseFloat(e.target.dataset.discount);
+            applyDiscount(discountRate);
+        });
+    });
+
+    applyCustomDiscountButton.addEventListener('click', applyCustomDiscount);
+
+    productTabButtons.forEach(button => {
+        button.addEventListener('click', (e) => {
+            productTabButtons.forEach(btn => btn.classList.remove('active'));
+            e.target.classList.add('active');
+            const category = e.target.dataset.category;
+            renderProducts(category);
+        });
+    });
+
+    // --- 9. Başlangıç Yüklemesi ---
+    checkAndResetRevenuesAutomatically(); // Sayfa yüklendiğinde otomatik sıfırlamaları kontrol et
+    renderTables(); // Masa durumunu başta göster
+    updateRevenueDisplays(); // Ciroları başta göster
+});
