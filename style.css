@@ -960,4 +960,82 @@ h1 {
     .modal-content {
         padding: 20px;
     }
+    /* Küçük butonlar için stil düzeltmeleri */
+    .action-button.info-button-small,
+    .action-button.success-button-small {
+        padding: 5px 8px; /* Daha küçük padding */
+        font-size: 0.9em; /* Daha küçük font */
+        border-radius: 5px; /* Köşeleri yuvarlak */
+    }
+
+    .action-button.info-button-small {
+        background-color: #17a2b8; /* Mavi tonu */
+        color: white;
+    }
+    .action-button.info-button-small:hover {
+        background-color: #138496;
+    }
+
+    .action-button.success-button-small {
+        background-color: #28a745; /* Yeşil tonu */
+        color: white;
+    }
+    .action-button.success-button-small:hover {
+        background-color: #218838;
+    }
+
+    /* Ürün Yönetimi Listesindeki inputlar için stil */
+    #product-management-list li .edit-product-name-input,
+    #product-management-list li .edit-product-price-input {
+        width: 120px; /* Genişlik ayarı */
+        padding: 5px 8px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        font-size: 0.9em;
+        margin-right: 5px; /* İki input arası boşluk */
+    }
+
+    /* Ürün bilgilerinin ve aksiyon butonlarının hizalanması */
+    #product-management-list li {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 0;
+        border-bottom: 1px solid #eee;
+        font-size: 1.1em;
+    }
+
+    #product-management-list li .product-info {
+        flex-grow: 1;
+        margin-right: 15px;
+    }
+
+    #product-management-list li .product-actions {
+        display: flex;
+        gap: 8px; /* Butonlar arası boşluk */
+        flex-shrink: 0; /* Butonların küçülmesini engelle */
+    }
+
+    /* Duyarlı tasarım için küçük ekranlarda düzenleme inputları */
+    @media (max-width: 768px) {
+        #product-management-list li {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 10px;
+        }
+        #product-management-list li .product-info {
+            width: 100%;
+            margin-right: 0;
+        }
+        #product-management-list li .product-actions {
+            width: 100%;
+            justify-content: flex-end; /* Butonları sağa hizala */
+        }
+        #product-management-list li .edit-product-name-input,
+        #product-management-list li .edit-product-price-input {
+            width: calc(100% - 100px); /* Kalan alanı doldur */
+            margin-right: 10px;
+        }
+    }
+
 }

@@ -21,22 +21,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Ciro Rapor Elementleri
     const dailyTotalRevenueAmount = document.getElementById('daily-total-revenue-amount');
-    const resetDailyRevenueButton = document.getElementById('reset-daily-revenue-button'); // Ana ekrandaki günlük sıfırlama
+    const resetDailyRevenueButton = document.getElementById('reset-daily-revenue-button');
     const showReportsButton = document.getElementById('show-reports-button');
     const reportScreen = document.getElementById('report-screen');
     const backToMainFromReportsButton = document.getElementById('back-to-main-from-reports-button');
     const dailyRevenueDisplay = document.getElementById('daily-revenue');
     const dailyCashRevenueDisplay = document.getElementById('daily-cash-revenue');
-    const dailyCardRevenueDisplay = document.getElementById('daily-card-revenue');
-    // Yeni Haftalık ve Aylık Ciro Elementleri
+    const dailyCardRevenueDisplay = document.getElementById('daily-card-revenue'); // Hata düzeltildi!
     const weeklyRevenueDisplay = document.getElementById('weekly-revenue');
     const weeklyCashRevenueDisplay = document.getElementById('weekly-cash-revenue');
     const weeklyCardRevenueDisplay = document.getElementById('weekly-card-revenue');
     const monthlyRevenueDisplay = document.getElementById('monthly-revenue');
     const monthlyCashRevenueDisplay = document.getElementById('monthly-cash-revenue');
     const monthlyCardRevenueDisplay = document.getElementById('monthly-card-revenue');
-    const resetAllRevenueButton = document.getElementById('reset-all-revenue-button'); // Tüm ciroları sıfırlama butonu
-
+    const resetAllRevenueButton = document.getElementById('reset-all-revenue-button');
 
     const showProductsButton = document.getElementById('show-products-button');
     const productManagementScreen = document.getElementById('product-management-screen');
@@ -76,15 +74,12 @@ document.addEventListener('DOMContentLoaded', () => {
     ];
     let currentTableId = null;
 
-    // Tüm tamamlanmış siparişleri (işlemleri) tutacak yeni dizi
-    // Her işlemde tarih, miktar, ödeme yöntemi bilgileri olacak
     let transactions = JSON.parse(localStorage.getItem('transactions')) || [];
 
-    // Son sıfırlama tarihlerini tutalım (Otomatik sıfırlama için)
     let lastResetDates = JSON.parse(localStorage.getItem('lastResetDates')) || {
         daily: new Date().toDateString(),
-        weekly: new Date().toISOString().substring(0, 10), // ISO tarih formatında haftanın başlangıcı (örneğin Pzt)
-        monthly: new Date().toISOString().substring(0, 7) // YYYY-MM formatında
+        weekly: new Date().toISOString().substring(0, 10),
+        monthly: new Date().toISOString().substring(0, 7)
     };
 
     // --- 3. Yardımcı Fonksiyonlar ---
@@ -98,9 +93,9 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         document.getElementById(screenId).classList.add('active-screen');
         if (screenId === 'main-screen') {
-            renderTables(); // Ana ekrana dönüldüğünde masa toplamlarını günceller
+            renderTables();
         } else if (screenId === 'report-screen') {
-            updateRevenueDisplays(); // Rapor ekranına geçildiğinde tüm ciroları günceller
+            updateRevenueDisplays();
         }
     }
 
@@ -120,7 +115,6 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('lastResetDates', JSON.stringify(lastResetDates));
     }
 
-    // Ciroları hesaplayan ana fonksiyon
     function calculateRevenue(period) {
         const now = new Date();
         let filteredTransactions = [];
@@ -131,8 +125,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 return transactionDate.toDateString() === now.toDateString();
             });
         } else if (period === 'weekly') {
-            const firstDayOfWeek = new Date(now.setDate(now.getDate() - now.getDay() + (now.getDay() === 0 ? -6 : 1))); // Pazartesi'yi haftanın ilk günü olarak al (Pazar ise bir önceki pazartesi)
-            firstDayOfWeek.setHours(0, 0, 0, 0); // Saati sıfırla
+            const firstDayOfWeek = new Date(now.getFullYear(), now.getMonth(), now.getDate() - (now.getDay() === 0 ? 6 : now.getDay() - 1)); // Pazartesi
+            firstDayOfWeek.setHours(0, 0, 0, 0);
             filteredTransactions = transactions.filter(t => {
                 const transactionDate = new Date(t.date);
                 return transactionDate >= firstDayOfWeek;
@@ -151,13 +145,12 @@ document.addEventListener('DOMContentLoaded', () => {
         return { total, cash, card };
     }
 
-    // Ciro göstergelerini güncelleyen fonksiyon
     function updateRevenueDisplays() {
         const daily = calculateRevenue('daily');
         const weekly = calculateRevenue('weekly');
         const monthly = calculateRevenue('monthly');
 
-        dailyTotalRevenueAmount.textContent = daily.total.toFixed(2); // Ana ekran için
+        dailyTotalRevenueAmount.textContent = daily.total.toFixed(2);
         dailyRevenueDisplay.textContent = daily.total.toFixed(2) + '₺';
         dailyCashRevenueDisplay.textContent = daily.cash.toFixed(2) + '₺';
         dailyCardRevenueDisplay.textContent = daily.card.toFixed(2) + '₺';
@@ -263,8 +256,15 @@ document.addEventListener('DOMContentLoaded', () => {
             const listItem = document.createElement('li');
             listItem.dataset.id = product.id;
             listItem.innerHTML = `
-                <span>${product.name} - ${product.price.toFixed(2)}₺ (${product.category})</span>
-                <button class="delete-product-button danger-button-small"><i class="fas fa-trash-alt"></i> Sil</button>
+                <span class="product-info">
+                    <span class="product-name">${product.name}</span> -
+                    <span class="product-price">${product.price.toFixed(2)}₺</span>
+                    (<span class="product-category">${product.category}</span>)
+                </span>
+                <div class="product-actions">
+                    <button class="edit-product-button action-button info-button-small"><i class="fas fa-edit"></i> Düzenle</button>
+                    <button class="delete-product-button danger-button-small"><i class="fas fa-trash-alt"></i> Sil</button>
+                </div>
             `;
             productManagementList.appendChild(listItem);
         });
@@ -300,6 +300,48 @@ document.addEventListener('DOMContentLoaded', () => {
             showToast('Ürün başarıyla silindi.', 'success');
         }
     }
+
+    // Ürün düzenleme fonksiyonu
+    function editProduct(productId, listItem) {
+        const product = products.find(p => p.id === productId);
+        if (!product) return;
+
+        const productNameSpan = listItem.querySelector('.product-name');
+        const productPriceSpan = listItem.querySelector('.product-price');
+        const productActionsDiv = listItem.querySelector('.product-actions');
+
+        // Düzenleme moduna geç
+        productNameSpan.innerHTML = `<input type="text" class="edit-product-name-input" value="${product.name}">`;
+        productPriceSpan.innerHTML = `<input type="number" class="edit-product-price-input" value="${product.price.toFixed(2)}" step="0.01" min="0.01">₺`;
+
+        productActionsDiv.innerHTML = `
+            <button class="save-product-button action-button success-button-small"><i class="fas fa-save"></i> Kaydet</button>
+            <button class="cancel-edit-button action-button danger-button-small"><i class="fas fa-times"></i> İptal</button>
+        `;
+
+        // Olay dinleyicilerini ekle
+        productActionsDiv.querySelector('.save-product-button').addEventListener('click', () => {
+            const newName = listItem.querySelector('.edit-product-name-input').value.trim();
+            const newPrice = parseFloat(listItem.querySelector('.edit-product-price-input').value);
+
+            if (!newName || isNaN(newPrice) || newPrice <= 0) {
+                showToast('Lütfen geçerli bir ürün adı ve fiyatı girin.', 'error');
+                return;
+            }
+
+            product.name = newName;
+            product.price = newPrice;
+            saveProducts();
+            renderProductManagementList(); // Listeyi yeniden render et
+            showToast('Ürün başarıyla güncellendi!', 'success');
+        });
+
+        productActionsDiv.querySelector('.cancel-edit-button').addEventListener('click', () => {
+            renderProductManagementList(); // Değişiklikleri iptal et ve listeyi yeniden render et
+            showToast('Düzenleme iptal edildi.', 'info');
+        });
+    }
+
 
     // --- 6. Sipariş İşlemleri ---
     function renderOrderDetails() {
@@ -348,7 +390,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         saveTables();
         renderOrderDetails();
-        renderTables(); // Ana ekrandaki masa toplamlarını günceller
+        renderTables();
     }
 
     function addProductToOrder(productId) {
@@ -455,21 +497,19 @@ document.addEventListener('DOMContentLoaded', () => {
             const selectedPaymentMethod = document.querySelector('input[name="payment-method"]:checked').value;
             const totalAmount = table.order.total;
 
-            // İşlemi transactions dizisine ekle
             transactions.push({
                 id: generateUniqueId('trn'),
-                date: new Date().toISOString(), // ISO formatında tarih ve saat
+                date: new Date().toISOString(),
                 amount: totalAmount,
                 paymentMethod: selectedPaymentMethod,
-                items: table.order.items // Sipariş detaylarını da kaydedebiliriz
+                items: table.order.items
             });
-            saveTransactions(); // İşlemleri kaydet
+            saveTransactions();
 
-            // Masayı sıfırla
             table.order = { items: [], subtotal: 0, discountRate: 0, discountAmount: 0, total: 0 };
             saveTables();
             renderTables();
-            updateRevenueDisplays(); // Ciroları güncelle
+            updateRevenueDisplays();
             showToast(`${table.name} siparişi başarıyla tamamlandı!`, 'success');
             showScreen('main-screen');
         }
@@ -513,56 +553,61 @@ document.addEventListener('DOMContentLoaded', () => {
     function checkAndResetRevenuesAutomatically() {
         const now = new Date();
 
-        // Günlük sıfırlama
         const lastDaily = new Date(lastResetDates.daily);
         if (now.toDateString() !== lastDaily.toDateString()) {
-            transactions = transactions.filter(t => new Date(t.date).toDateString() === now.toDateString());
+            // Sadece bugüne ait işlemleri tut
+            transactions = transactions.filter(t => {
+                const transactionDate = new Date(t.date);
+                return transactionDate.toDateString() === now.toDateString();
+            });
             saveTransactions();
             lastResetDates.daily = now.toDateString();
             saveLastResetDates();
             showToast('Günlük ciro otomatik olarak sıfırlandı.', 'info');
         }
 
-        // Haftalık sıfırlama (Pazartesi'yi haftanın başlangıcı olarak kabul ederiz)
-        const currentWeekStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - (now.getDay() === 0 ? 6 : now.getDay() - 1));
-        currentWeekStart.setHours(0,0,0,0);
+        const currentWeekStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - (now.getDay() === 0 ? 6 : now.getDay() - 1)); // Pazartesi
+        currentWeekStart.setHours(0, 0, 0, 0);
         const lastWeekly = new Date(lastResetDates.weekly);
 
         if (currentWeekStart.toDateString() !== lastWeekly.toDateString()) {
             // Sadece mevcut haftanın işlemlerini tut
-            transactions = transactions.filter(t => new Date(t.date) >= currentWeekStart);
+            transactions = transactions.filter(t => {
+                const transactionDate = new Date(t.date);
+                return transactionDate >= currentWeekStart;
+            });
             saveTransactions();
             lastResetDates.weekly = currentWeekStart.toISOString().substring(0, 10);
             saveLastResetDates();
             showToast('Haftalık ciro otomatik olarak sıfırlandı.', 'info');
         }
 
-
-        // Aylık sıfırlama
         const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-        currentMonthStart.setHours(0,0,0,0);
+        currentMonthStart.setHours(0, 0, 0, 0);
         const lastMonthly = new Date(lastResetDates.monthly + '-01'); // YYYY-MM'den Date objesi oluştur
 
         if (currentMonthStart.toDateString() !== lastMonthly.toDateString()) {
             // Sadece mevcut ayın işlemlerini tut
-            transactions = transactions.filter(t => new Date(t.date) >= currentMonthStart);
+            transactions = transactions.filter(t => {
+                const transactionDate = new Date(t.date);
+                return transactionDate >= currentMonthStart;
+            });
             saveTransactions();
             lastResetDates.monthly = now.toISOString().substring(0, 7);
             saveLastResetDates();
             showToast('Aylık ciro otomatik olarak sıfırlandı.', 'info');
         }
 
-        updateRevenueDisplays(); // Ciroları otomatik sıfırlamadan sonra güncelle
+        updateRevenueDisplays();
     }
 
 
     function resetDailyRevenueManually() {
         if (confirm('Günlük ciroyu sıfırlamak istediğinizden emin misiniz? Bu işlem, günlük ciro verilerini sıfırlar.')) {
             const now = new Date();
-            // Sadece bugüne ait olmayan işlemleri tut
             transactions = transactions.filter(t => new Date(t.date).toDateString() !== now.toDateString());
             saveTransactions();
-            lastResetDates.daily = now.toDateString(); // Sıfırlama tarihini bugüne ayarla
+            lastResetDates.daily = now.toDateString();
             saveLastResetDates();
             updateRevenueDisplays();
             showToast('Günlük ciro başarıyla sıfırlandı.', 'info');
@@ -571,7 +616,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function resetAllRevenues() {
         if (confirm('Tüm ciro verilerini (Günlük, Haftalık, Aylık) sıfırlamak istediğinizden emin misiniz? Bu işlem geri alınamaz!')) {
-            transactions = []; // Tüm işlemleri sil
+            transactions = [];
             saveTransactions();
 
             const now = new Date();
@@ -657,11 +702,11 @@ document.addEventListener('DOMContentLoaded', () => {
         location.reload();
     });
 
-    resetDailyRevenueButton.addEventListener('click', resetDailyRevenueManually); // Manuel günlük sıfırlama
-    resetAllRevenueButton.addEventListener('click', resetAllRevenues); // Tüm ciroları sıfırlama
+    resetDailyRevenueButton.addEventListener('click', resetDailyRevenueManually);
+    resetAllRevenueButton.addEventListener('click', resetAllRevenues);
 
     showReportsButton.addEventListener('click', () => {
-        updateRevenueDisplays(); // Rapor ekranına geçerken güncel verileri göster
+        updateRevenueDisplays();
         showScreen('report-screen');
     });
     backToMainFromReportsButton.addEventListener('click', () => showScreen('main-screen'));
@@ -676,9 +721,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
     productManagementList.addEventListener('click', (e) => {
         const deleteButton = e.target.closest('.delete-product-button');
+        const editButton = e.target.closest('.edit-product-button');
+
         if (deleteButton) {
-            const productId = deleteButton.parentElement.dataset.id;
+            const listItem = e.target.closest('li'); // Doğru liste öğesini bul
+            const productId = listItem.dataset.id;
             deleteProduct(productId);
+        } else if (editButton) {
+            const listItem = e.target.closest('li'); // Doğru liste öğesini bul
+            const productId = listItem.dataset.id;
+            editProduct(productId, listItem);
         }
     });
 
@@ -701,7 +753,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // --- 9. Başlangıç Yüklemesi ---
-    checkAndResetRevenuesAutomatically(); // Sayfa yüklendiğinde otomatik sıfırlamaları kontrol et
-    renderTables(); // Masa durumunu başta göster
-    updateRevenueDisplays(); // Ciroları başta göster
+    checkAndResetRevenuesAutomatically();
+    renderTables();
+    updateRevenueDisplays();
 });
